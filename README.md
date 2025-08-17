@@ -20,7 +20,45 @@ The bot uses several sophisticated strategies to solve Wordle puzzles:
 
 ### 1. **Starting Word Selection**
 
-Begins with statistically optimal words like "STARE" or "CRANE" that contain common letters and good letter distribution.
+The bot uses a sophisticated algorithm to determine the optimal starting word:
+
+#### **Word Scoring Algorithm**
+
+Each potential starting word is scored based on multiple factors:
+
+1. **Letter Frequency Score**: Base score from how common each letter appears in the word list
+2. **Position-Based Bonuses**:
+   - **Starting Position**: +10 points for common starting letters (S, C, T, A, R)
+   - **Ending Position**: +3 points for common ending letters (E, R, T, Y, N)
+3. **Vowel Distribution**: +5 points for each vowel (A, E, I, O, U)
+4. **Letter Uniqueness**: +2 points for each unique letter (encourages words with diverse letters)
+5. **Repeated Letter Penalty**: -5 points for each repeated letter
+
+#### **Starting Word Ranking**
+
+The bot maintains a curated list of optimal starting words and ranks them by score:
+
+```typescript
+// Top starting words (ordered by effectiveness)
+startingWords: [
+  "STARE", // High score: common letters, good distribution, unique
+  "CRANE", // High score: common letters, good distribution, unique
+  "SLATE", // High score: common letters, good distribution, unique
+  "TRACE", // High score: common letters, good distribution, unique
+  "ADIEU", // High score: vowel-heavy, unique letters
+  "AUDIO", // High score: vowel-heavy, unique letters
+  "RAISE", // High score: common letters, good distribution
+  "ARISE", // High score: common letters, good distribution
+];
+```
+
+#### **Why These Words Work**
+
+- **STARE/CRANE/SLATE**: Contain the most common letters (E, A, R, S, T) in optimal positions
+- **ADIEU/AUDIO**: Maximize vowel coverage to quickly identify vowel patterns
+- **RAISE/ARISE**: Balance of common consonants and vowels with good letter distribution
+
+The bot automatically selects the highest-scoring word as its starting guess, ensuring maximum information gain from the first attempt.
 
 ### 2. **Letter Frequency Analysis**
 
