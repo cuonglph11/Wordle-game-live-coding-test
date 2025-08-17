@@ -4,6 +4,10 @@ An intelligent AI bot that automatically plays Wordle-like puzzles by connecting
 
 **Now with full TypeScript support! 🚀**
 
+## Project Summary
+
+The AI Wordle Bot is an intelligent bot that automatically solves Wordle-like puzzles by connecting to the Votee API. It uses advanced algorithms including letter frequency analysis, constraint elimination, and adaptive word selection to achieve high success rates.
+
 ## Features ✨
 
 - **Smart Word Selection**: Uses letter frequency analysis and strategic scoring
@@ -13,6 +17,55 @@ An intelligent AI bot that automatically plays Wordle-like puzzles by connecting
 - **Configurable**: Easy to customize strategy parameters and API settings
 - **Error Handling**: Robust error handling with retry logic
 - **Type Safety**: Full TypeScript support with comprehensive type definitions
+
+## Project Structure
+
+```
+ai-wordle-bot/
+├── src/
+│   ├── types/
+│   │   └── index.ts          # TypeScript type definitions
+│   ├── enhanced-bot.ts       # Main bot implementation with analytics
+│   ├── config.ts             # Configuration settings
+│   └── __tests__/            # Test suite
+├── dist/                     # Compiled JavaScript (generated)
+├── tsconfig.json             # TypeScript configuration
+├── nodemon.json              # Development server configuration
+├── package.json              # Dependencies and scripts
+└── README.md                 # This file
+```
+
+## Key Components
+
+### 1. Main Bot (`src/enhanced-bot.ts`)
+
+- Advanced Wordle solving logic
+- Letter frequency analysis
+- Constraint elimination algorithms
+- Performance analytics and game history
+- Retry logic with exponential backoff
+- Configurable strategy parameters
+
+### 2. Configuration (`src/config.ts`)
+
+- API settings (URL, timeout, retries)
+- Game parameters (word length, max attempts)
+- Strategy configuration (starting words, scoring weights)
+- Logging preferences
+
+### 3. Testing (`src/__tests__/`)
+
+- Comprehensive test suite with Jest
+- Component testing (word scoring, constraint analysis)
+- Performance validation
+- Mock API testing
+
+### 4. Type Definitions (`src/types/index.ts`)
+
+- Complete TypeScript interfaces
+- API response types
+- Game data structures
+- Bot interface contracts
 
 ## How It Works 🧠
 
@@ -240,6 +293,20 @@ filterWords(words: string[], analysis: GuessAnalysis): string[] {
 }
 ```
 
+## API Integration 🔌
+
+The bot integrates with the Votee API endpoints:
+
+- `GET /daily` - Daily puzzle
+- `GET /random` - Random word puzzle
+- `GET /word/{word}` - Custom word puzzle
+
+Each endpoint accepts:
+
+- `guess`: The word to guess
+- `size`: Word length (default: 5)
+- `seed`: Random seed (for random games)
+
 ## Installation 🚀
 
 1. Clone the repository:
@@ -280,11 +347,12 @@ Build and run the compiled version:
 npm start                # Builds and runs the bot
 ```
 
-### Testing and Demo
+### Testing
 
 ```bash
-npm run test             # Run test suite with mock API
-npm run demo             # Run interactive demo
+npm run test             # Run test suite with Jest
+npm run test:watch       # Watch mode for development
+npm run test:coverage    # Run with coverage report
 ```
 
 ### Advanced Usage
@@ -303,23 +371,6 @@ await bot.playMultipleGames(5, "random");
 // Get performance analytics
 const analytics = bot.getAnalytics();
 console.log(analytics);
-```
-
-## Project Structure 📁
-
-```
-ai-wordle-bot/
-├── src/
-│   ├── types/
-│   │   └── index.ts          # TypeScript type definitions
-│   ├── enhanced-bot.ts       # Main bot implementation with analytics
-│   ├── config.ts             # Configuration settings
-│   ├── test-bot.ts           # Test suite with mock API
-│   └── demo.ts               # Demo script
-├── dist/                     # Compiled JavaScript (generated)
-├── tsconfig.json             # TypeScript configuration
-├── package.json              # Dependencies and scripts
-└── README.md                 # This file
 ```
 
 ## Configuration ⚙️
@@ -346,20 +397,6 @@ export interface BotConfig {
   };
 }
 ```
-
-## API Integration 🔌
-
-The bot integrates with the Votee API endpoints:
-
-- `GET /daily` - Daily puzzle
-- `GET /random` - Random word puzzle
-- `GET /word/{word}` - Custom word puzzle
-
-Each endpoint accepts:
-
-- `guess`: The word to guess
-- `size`: Word length (default: 5)
-- `seed`: Random seed (for random games)
 
 ## TypeScript Features 🎯
 
@@ -393,18 +430,6 @@ startingWords: [
   "AUDIO",
   "RAISE",
   "ARISE",
-  "STARE",
-  "CRANE",
-  "SLATE",
-  "TRACE",
-  "ADIEU",
-  "AUDIO",
-  "RAISE",
-  "ARISE",
-  "STARE",
-  "CRANE",
-  "SLATE",
-  "TRACE",
 ];
 ```
 
@@ -462,7 +487,7 @@ npm run test
 1. **Extend Types**: Add new interfaces in `src/types/index.ts`
 2. **Implement Methods**: Follow the `IWordleBot` interface
 3. **Type Safety**: Ensure all functions are properly typed
-4. **Testing**: Add tests in `src/test-bot.ts`
+4. **Testing**: Add tests in `src/__tests__/`
 
 ### Code Quality
 
@@ -480,18 +505,7 @@ The project includes a comprehensive test suite:
 ```bash
 npm run test              # Run all tests
 npm run test:watch        # Watch mode for development
-```
-
-### Mock API
-
-Tests use a mock API that simulates the Votee API responses:
-
-```typescript
-class MockVoteeAPI {
-  public async makeGuess(guess: string): Promise<GuessResult[]> {
-    // Simulate API response
-  }
-}
+npm run test:coverage     # Coverage report
 ```
 
 ### Test Coverage
