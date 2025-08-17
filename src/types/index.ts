@@ -36,6 +36,15 @@ export interface GameData {
 }
 
 // Analysis Types
+export interface NormalizedConstraints {
+  greens: (string | null)[]; // Length 5 array
+  minCounts: Record<string, number>;
+  maxCounts: Partial<Record<string, number>>;
+  bannedPos: Record<string, Set<number>>;
+  forbidden: Set<string>;
+  testedLetters: Set<string>;
+}
+
 export interface GuessAnalysis {
   correct: Set<string>;
   present: Set<string>;
@@ -50,16 +59,35 @@ export interface LetterCount {
   max: number | null;
 }
 
+export interface BucketAnalysis {
+  pattern: string;
+  size: number;
+  entropy: number;
+}
+
 export interface ScoredWord {
   word: string;
   score: number;
 }
 
 // Configuration Types
+export interface CacheConfig {
+  maxSize: number;
+  ttl: number;
+}
+
 export interface APIConfig {
   baseURL: string;
   timeout: number;
   retries: number;
+  dictionary: {
+    baseURL: string;
+    fallbackBaseURL: string;
+    batchSize: number;
+    delayBetweenBatches: number;
+    timeout: number;
+    cache: CacheConfig;
+  };
 }
 
 export interface GameConfig {

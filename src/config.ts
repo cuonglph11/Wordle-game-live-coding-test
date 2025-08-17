@@ -6,13 +6,24 @@ const config: BotConfig = {
     baseURL: "https://wordle.votee.dev:8000",
     timeout: 10000,
     retries: 3,
+    dictionary: {
+      baseURL: "https://api.dictionaryapi.dev/api/v2/entries/en",
+      fallbackBaseURL: "https://freedictionaryapi.com/api/v1/entries/en",
+      batchSize: 5,
+      delayBetweenBatches: 1000,
+      timeout: 3000, // 3 seconds timeout for dictionary requests
+      cache: {
+        maxSize: 2000, // Store up to 2000 words
+        ttl: 604800000, // 7 days in milliseconds
+      },
+    },
   },
 
   // Game Configuration
   game: {
     wordLength: 5,
-    maxAttempts: 6,
-    delayBetweenGuesses: 1000, // milliseconds
+    maxAttempts: 50,
+    delayBetweenGuesses: 500, // milliseconds
     delayBetweenGames: 2000, // milliseconds
   },
 

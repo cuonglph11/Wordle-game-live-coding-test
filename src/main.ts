@@ -2,7 +2,9 @@ import { EnhancedAIWordleBot } from "./enhanced-bot";
 
 // Main execution
 async function main(): Promise<void> {
+  console.log("Start main");
   const bot = new EnhancedAIWordleBot();
+  console.log("Bot in");
 
   try {
     // Play a single daily game

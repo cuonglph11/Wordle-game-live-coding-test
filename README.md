@@ -113,24 +113,64 @@ startingWords: [
 
 The bot automatically selects the highest-scoring word as its starting guess, ensuring maximum information gain from the first attempt.
 
-### 2. **Letter Frequency Analysis**
+### 2. **Advanced Word Selection Strategy**
 
-Words are scored based on:
+The bot employs a hybrid strategy combining multiple approaches:
 
-- Frequency of letters in common words
-- Position-based bonuses (common starting/ending letters)
-- Vowel distribution
-- Uniqueness of letters
+#### Information Theory (Entropy)
 
-### 3. **Constraint Elimination**
+For large candidate sets (>20 words), the bot uses information entropy to select guesses that maximize information gain:
 
-After each guess, the bot:
+- Calculates pattern frequency distributions
+- Scores words by expected information gain
+- Handles duplicate letters with special pattern rules
+- Optimizes for reducing candidate set size
+
+#### Minimax Strategy
+
+For small candidate sets (≤20 words), switches to minimax:
+
+- Minimizes worst-case bucket size after guess
+- Guarantees optimal endgame play
+- Tie-breaks using entropy when multiple options exist
+- Prefers words from candidate set when scores are close
+
+#### Beam Search Fallback
+
+When full calculation becomes too expensive:
+
+- Uses beam search to explore promising candidates
+- Scores based on letter position frequencies
+- Prioritizes untested letters for better coverage
+- Maintains strict hard-mode constraint compliance
+
+### 3. **Constraint Processing**
+
+The bot employs sophisticated constraint handling:
+
+#### Normalized Constraints
+
+- Validates and de-duplicates constraints
+- Resolves conflicts between min/max letter counts
+- Handles duplicate letter rules correctly
+- Maintains position-specific restrictions
+
+#### Pattern Analysis
 
 1. Identifies correct letter positions (🟩)
 2. Tracks present but misplaced letters (🟨)
-3. Eliminates impossible letters (⬜)
-4. Builds letter count constraints
-5. Filters possible words accordingly
+3. Handles duplicate letters specially:
+   - Marks extras as absent only after correct/present are allocated
+   - Updates min/max letter counts accordingly
+4. Builds comprehensive letter count constraints
+5. Filters possible words using all constraints
+
+#### Dictionary Validation
+
+- Uses Dictionary API with smart caching
+- Implements LRU cache for performance
+- Handles API failures gracefully
+- Supports custom allowlist integration
 
 ### 4. **Adaptive Word Selection**
 
@@ -263,11 +303,40 @@ analyzeResults(results: GuessResult[]): GuessAnalysis {
 }
 ```
 
-### Word Filtering
+### Word Filtering and Pattern Analysis
 
-The bot eliminates impossible words based on constraints:
+The bot implements sophisticated word filtering and pattern analysis:
 
 ```typescript
+// Compute Wordle feedback pattern with duplicate handling
+computePattern(guess: string, secret: string): string {
+    const pattern = Array(5).fill('0');
+    const unusedSecret = [...secret];
+    const unusedGuess = [...guess];
+
+    // First pass: Mark correct letters
+    for (let i = 0; i < 5; i++) {
+        if (guess[i] === secret[i]) {
+            pattern[i] = '2';
+            unusedSecret[i] = '_';
+            unusedGuess[i] = '_';
+        }
+    }
+
+    // Second pass: Mark present letters
+    for (let i = 0; i < 5; i++) {
+        if (unusedGuess[i] === '_') continue;
+        const secretIdx = unusedSecret.indexOf(unusedGuess[i]);
+        if (secretIdx !== -1) {
+            pattern[i] = '1';
+            unusedSecret[secretIdx] = '_';
+        }
+    }
+
+    return pattern.join('');
+}
+
+// Filter words based on all constraints
 filterWords(words: string[], analysis: GuessAnalysis): string[] {
     return words.filter(word => {
         // Check position constraints
