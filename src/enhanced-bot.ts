@@ -238,9 +238,52 @@ export class EnhancedAIWordleBot implements IWordleBot {
     return score;
   }
 
-  // Get the best starting word
-  private getBestStartingWord(): string {
-    return this.startingWords.sort(
+  // Get the best starting word that hasn't been guessed yet and satisfies constraints
+  private getBestStartingWord(previousGuesses: string[] = [], analysis?: GuessAnalysis): string {
+    let availableStartingWords = this.startingWords.filter(
+      (word) => !previousGuesses.includes(word)
+    );
+    
+    // If analysis is provided, also filter by constraints
+    if (analysis) {
+      availableStartingWords = availableStartingWords.filter((word) => {
+        // Must include all present letters
+        for (const p of analysis.present) {
+          if (!word.includes(p)) return false;
+        }
+        // Must not include absent letters (unless that letter is also marked present/correct elsewhere)
+        for (const a of analysis.absent) {
+          if (
+            !analysis.present.has(a) &&
+            !analysis.correct.has(a) &&
+            word.includes(a)
+          ) {
+            return false;
+          }
+        }
+        // Letter count minimums and maximums
+        for (const [ch, { min, max }] of analysis.letterCounts.entries()) {
+          const count = (word.match(new RegExp(ch, "g")) || []).length;
+          if (count < min) return false;
+          if (max !== null && max !== undefined && count > max) return false;
+        }
+        return true;
+      });
+    }
+    
+    if (availableStartingWords.length === 0) {
+      // If no starting words satisfy the constraints, fall back to any word from the list that hasn't been guessed
+      availableStartingWords = this.startingWords.filter(
+        (word) => !previousGuesses.includes(word)
+      );
+      
+      if (availableStartingWords.length === 0) {
+        // If all starting words have been used, fall back to any word from the list
+        return this.startingWords[0];
+      }
+    }
+    
+    return availableStartingWords.sort(
       (a: string, b: string) => this.scoreWord(b) - this.scoreWord(a)
     )[0];
   }
@@ -554,6 +597,7 @@ export class EnhancedAIWordleBot implements IWordleBot {
               !w.includes(a)
           )
       );
+      
       if (looseFallback.length > 0) {
         looseFallback.sort(
           (a, b) =>
@@ -564,7 +608,7 @@ export class EnhancedAIWordleBot implements IWordleBot {
       }
 
       // If we truly cannot satisfy constraints, return the best starting word to gather new info
-      return this.getBestStartingWord();
+      return this.getBestStartingWord(previousGuesses, analysis);
     }
 
     // Get all possible words that meet our constraints to use as a corpus
@@ -665,7 +709,7 @@ export class EnhancedAIWordleBot implements IWordleBot {
       });
 
     if (scoredWords.length === 0) {
-      return this.getBestStartingWord();
+      return this.getBestStartingWord(previousGuesses, analysis);
     }
 
     // Return highest scoring candidate
@@ -749,7 +793,7 @@ export class EnhancedAIWordleBot implements IWordleBot {
       attempts: 0,
     };
 
-    let currentGuess = this.getBestStartingWord();
+    let currentGuess = this.getBestStartingWord([]);
 
     for (let attempt = 1; attempt <= this.maxAttempts; attempt++) {
       console.log(
@@ -996,7 +1040,7 @@ export class EnhancedAIWordleBot implements IWordleBot {
     const validCandidates = await this.dictionaryService.validateWords(
       candidates
     );
-    return validCandidates.slice(0, limit);
+    return (validCandidates || []).slice(0, limit);
   }
 
   private delay(ms: number): Promise<void> {
